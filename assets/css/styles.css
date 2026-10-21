@@ -380,7 +380,7 @@ strong { font-weight: 650; }
 /* --------------------------------------------------------------------------
    Steps (stacking cards)
    -------------------------------------------------------------------------- */
-.steps { display: grid; gap: 20px; }
+.steps { display: grid; gap: 20px; grid-auto-rows: 1fr; } /* stacked cards share one height */
 .step-card { position: relative; display: grid; border-radius: 32px; background: var(--card); border: 1px solid var(--line); overflow: hidden; transform-origin: 50% 0; box-shadow: 0 -20px 50px -40px rgba(43, 26, 61, 0.35); }
 .step-card__text { display: flex; flex-direction: column; justify-content: space-between; gap: 28px; padding: clamp(26px, 4vw, 52px); }
 .step-card__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -389,8 +389,10 @@ strong { font-weight: 650; }
 .step-card__shade { position: absolute; inset: 0; background: var(--night); opacity: 0; pointer-events: none; }
 .step-card .btn { align-self: flex-start; }
 @media (min-width: 900px) {
-  .step-card { position: sticky; top: calc(108px + var(--i) * 28px); grid-template-columns: 1.05fr 0.95fr; min-height: 470px; }
-  .step-card__media { aspect-ratio: auto; height: calc(100% - 20px); margin: 10px 10px 10px 0; }
+  /* Every card is the same height, whatever the shape of its photo or the length of its text. */
+  .step-card { position: sticky; top: calc(108px + var(--i) * 28px); grid-template-columns: 1.05fr 0.95fr; height: clamp(440px, 36vw, 500px); }
+  .step-card__media { aspect-ratio: auto; height: auto; min-height: 0; margin: 10px 10px 10px 0; }
+  .step-card__media img { position: absolute; inset: 0; }
   .steps { gap: 40px; padding-bottom: 40px; }
 }
 
