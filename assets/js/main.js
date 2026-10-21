@@ -102,8 +102,20 @@
     var els = $$(".reveal, .reveal-img, .lines");
     if (!("IntersectionObserver" in window) || reduceMotion) { els.forEach(function (el) { el.classList.add("is-in"); }); return; }
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
+      entries.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); show(en.target); } });
     }, { rootMargin: "0px 0px -8% 0px", threshold: 0.06 });
+    // Photos are revealed only once fully downloaded and decoded, so they appear whole
+    // (over their colour placeholder) instead of painting in strips on slow connections.
+    function show(el) {
+      var im = el.classList.contains("reveal-img") && el.querySelector("img");
+      if (!im) { el.classList.add("is-in"); return; }
+      var done = false, go = function () { if (!done) { done = true; requestAnimationFrame(function () { el.classList.add("is-in"); }); } };
+      var ready = function () { if (im.decode) im.decode().then(go, go); else go(); };
+      if (im.loading === "lazy") im.loading = "eager";
+      if (im.complete && im.naturalWidth) ready();
+      else { im.addEventListener("load", ready, { once: true }); im.addEventListener("error", go, { once: true }); }
+      setTimeout(go, 6000);
+    }
     els.forEach(function (el) { io.observe(el); });
   }
   window.__startReveals = startReveals;

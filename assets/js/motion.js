@@ -109,16 +109,18 @@
     counters.forEach(function (c) { c.textContent = "0"; cio.observe(c); });
   }
 
-  /* ---------- Marquee that speeds up with scroll ---------- */
+  /* ---------- Marquee that speeds up with scroll (desktop with a mouse; phones use a light CSS loop) ---------- */
+  var rich = fine && window.matchMedia("(min-width: 900px)").matches;
   var lastY = window.scrollY, velocity = 0, direction = 1;
-  (function sample() {
+  if (rich) (function sample() {
     var y = window.scrollY, d = y - lastY;
     velocity += (d - velocity) * 0.2;
     if (Math.abs(d) > 0.5) direction = d > 0 ? 1 : -1;
     lastY = y;
     requestAnimationFrame(sample);
   })();
-  if (hasGsap) $$(".marquee__track").forEach(function (track) {
+  if (hasGsap && rich) html.classList.add("js-marquee");
+  if (hasGsap && rich) $$(".marquee__track").forEach(function (track) {
     var x = 0;
     (function loop() {
       x -= (0.5 + Math.min(Math.abs(velocity) * 0.22, 12)) * direction;
@@ -169,7 +171,12 @@
   if (!hasGsap) return;
 
   /* ====================== Scroll choreography ====================== */
+  ST.config({ ignoreMobileResize: true });
   var mm = gsap.matchMedia();
+  // Scroll-linked parallax runs only on larger screens with a mouse or trackpad; on touch
+  // devices it fights the finger and makes scrolling feel heavy, so phones get simple reveals.
+  var DESKTOP = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
+  mm.add(DESKTOP, function () {
 
   // Home hero: portrait drifts, the big lotus turns slowly, the note floats.
   $$(".hero").forEach(function (hero) {
@@ -204,6 +211,18 @@
     gsap.fromTo(f, { y: i ? 80 : -40 }, { y: i ? -120 : 120, ease: "none", scrollTrigger: { trigger: f.parentElement, start: "top bottom", end: "bottom top", scrub: true } });
   });
 
+  // Corporate: the "High turnover. Low engagement." rows drift in opposite directions.
+  $$("[data-drift]").forEach(function (row) {
+    var dir = parseFloat(row.getAttribute("data-drift"));
+    gsap.fromTo(row, { xPercent: dir > 0 ? -18 : 0 }, { xPercent: dir > 0 ? 0 : -18, ease: "none", scrollTrigger: { trigger: row.parentElement, start: "top bottom", end: "bottom top", scrub: true } });
+  });
+  });
+
+  // Photo hero on phones: just the gentle zoom-out on arrival, no scroll link.
+  mm.add("not all and (min-width: 900px) and (hover: hover) and (pointer: fine)", function () {
+    $$("[data-parallax-hero]").forEach(function (m) { gsap.fromTo(m, { scale: 1.08 }, { scale: 1, duration: 2, ease: "expo.out" }); });
+  });
+
   // Text that lights up word by word as you read.
   $$("[data-scrub-words]").forEach(function (el) {
     (function wrap(node) {
@@ -229,14 +248,8 @@
     gsap.to(paths, { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut", stagger: 0.12, scrollTrigger: { trigger: l, start: "top 85%" } });
   });
 
-  // Corporate: the "High turnover. Low engagement." rows drift in opposite directions.
-  $$("[data-drift]").forEach(function (row) {
-    var dir = parseFloat(row.getAttribute("data-drift"));
-    gsap.fromTo(row, { xPercent: dir > 0 ? -18 : 0 }, { xPercent: dir > 0 ? 0 : -18, ease: "none", scrollTrigger: { trigger: row.parentElement, start: "top bottom", end: "bottom top", scrub: true } });
-  });
-
   // About: pinned, sideways story chapters on desktop.
-  mm.add("(min-width: 1024px)", function () {
+  mm.add("(min-width: 1024px) and (hover: hover) and (pointer: fine)", function () {
     var section = $("[data-hscroll]");
     if (!section) return;
     var track = $(".story__track", section), prog = $(".story__progress", section);
@@ -251,7 +264,7 @@
   });
 
   // Steps stack: each covered card eases back and dims.
-  mm.add("(min-width: 900px)", function () {
+  mm.add(DESKTOP, function () {
     var cards = $$("[data-stack] .step-card");
     cards.forEach(function (card, i) {
       var next = cards[i + 1];
