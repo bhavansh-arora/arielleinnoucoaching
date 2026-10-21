@@ -842,16 +842,43 @@ strong { font-weight: 650; }
 .preloader__bar span { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(var(--p, 0)); }
 @keyframes rise { to { transform: none; } }
 @keyframes fade { to { opacity: 1; } }
-.curtain { position: fixed; inset: 0; z-index: 140; display: grid; place-items: center; background: var(--plum); transform: translateY(101%); pointer-events: none; visibility: hidden; }
+/* Page curtain: a lilac wash, then deep plum, rise with an arched top edge (like the photo frames).
+   The lotus draws itself with the wordmark and the name of the next page; on arrival the
+   layers lift away with an arched bottom edge. */
+.curtain { position: fixed; inset: 0; z-index: 140; display: grid; place-items: center; pointer-events: none; visibility: hidden; }
 .is-leaving .curtain, .is-entering .curtain, .is-entered .curtain { visibility: visible; }
-.curtain__lotus { width: 90px; color: var(--lilac); opacity: 0; transition: opacity 0.4s; }
-.curtain__lotus path { stroke: var(--plum); }
-.is-leaving .curtain { transform: none; transition: transform 0.7s var(--ease-io); }
-.is-leaving .curtain__lotus { opacity: 1; transition-delay: 0.35s; }
-.is-entering .curtain { transform: none; }
-.is-entering .curtain__lotus { opacity: 1; }
-.is-entered .curtain { transform: translateY(-101%); transition: transform 0.95s var(--ease-io); }
-.is-entered .curtain__lotus { opacity: 0; }
+.is-leaving .curtain { pointer-events: auto; }
+.curtain__layer { position: absolute; inset: 0; clip-path: ellipse(80% 0% at 50% 100%); }
+.curtain__layer--a { background: linear-gradient(170deg, var(--lilac) 0%, var(--mint) 100%); }
+.curtain__layer--b { background: radial-gradient(120% 70% at 50% 108%, #4b2a6b 0%, var(--plum) 52%, var(--night) 100%); }
+.curtain__inner { position: relative; z-index: 1; display: grid; justify-items: center; gap: 14px; padding: 24px; text-align: center; color: var(--ivory); opacity: 0; }
+.curtain__lotus { width: clamp(84px, 9vw, 112px); color: transparent; margin-bottom: 6px; }
+.curtain__lotus path { fill: transparent; stroke: var(--lilac); stroke-width: 0.7; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.curtain__brand { overflow: hidden; font-family: var(--serif); font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.9rem); font-weight: 340; letter-spacing: -0.015em; line-height: 1.15; }
+.curtain__brand span, .curtain__title { display: block; transform: translateY(110%); }
+.curtain__to { display: flex; align-items: center; gap: 14px; overflow: hidden; }
+.curtain__title { font-family: var(--serif); font-style: italic; font-size: clamp(1.1rem, 1rem + 0.5vw, 1.4rem); color: var(--lilac); font-variation-settings: "SOFT" 100; padding: 0 0.1em 0.1em; }
+.curtain__rule { width: 34px; height: 1px; background: rgba(201, 179, 230, 0.5); transform: scaleX(0); }
+/* Leaving: layers rise, then the brand composes itself */
+.is-leaving .curtain__layer { clip-path: ellipse(150% 165% at 50% 100%); transition: clip-path 0.78s var(--ease-io); }
+.is-leaving .curtain__layer--b { transition-delay: 0.09s; }
+.is-leaving .curtain__inner { opacity: 1; transition: opacity 0.25s 0.45s; }
+.is-leaving .curtain__lotus path { stroke-dashoffset: 0; fill: var(--lilac); stroke: var(--plum); transition: stroke-dashoffset 0.55s var(--ease-io) 0.36s, fill 0.4s ease 0.72s, stroke 0.4s ease 0.72s; }
+.is-leaving .curtain__lotus path:nth-child(2) { transition-delay: 0.4s, 0.74s, 0.74s; }
+.is-leaving .curtain__lotus path:nth-child(3) { transition-delay: 0.44s, 0.76s, 0.76s; }
+.is-leaving .curtain__lotus path:nth-child(4) { transition-delay: 0.48s, 0.78s, 0.78s; }
+.is-leaving .curtain__lotus path:nth-child(5) { transition-delay: 0.52s, 0.8s, 0.8s; }
+.is-leaving .curtain__brand span { transform: none; transition: transform 0.7s var(--ease) 0.46s; }
+.is-leaving .curtain__title { transform: none; transition: transform 0.7s var(--ease) 0.56s; }
+.is-leaving .curtain__rule { transform: none; transition: transform 0.6s var(--ease) 0.6s; }
+/* Arriving: the composed brand holds for a beat, then everything lifts away */
+.is-entering .curtain__layer { clip-path: ellipse(150% 165% at 50% 0%); }
+.is-entering .curtain__inner, .is-entered .curtain__inner { opacity: 1; }
+.is-entering .curtain__lotus path, .is-entered .curtain__lotus path { stroke-dashoffset: 0; fill: var(--lilac); stroke: var(--plum); }
+.is-entering .curtain__brand span, .is-entering .curtain__title, .is-entered .curtain__brand span, .is-entered .curtain__title, .is-entering .curtain__rule, .is-entered .curtain__rule { transform: none; }
+.is-entered .curtain__inner { opacity: 0; transform: translateY(-28px); transition: opacity 0.45s ease, transform 0.7s var(--ease); }
+.is-entered .curtain__layer { clip-path: ellipse(80% 0% at 50% 0%); transition: clip-path 1s var(--ease-io) 0.12s; }
+.is-entered .curtain__layer--a { transition-delay: 0.26s; }
 .scroll-progress { position: fixed; inset: 0 0 auto; z-index: 70; height: 2px; pointer-events: none; }
 .scroll-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--teal)); transform-origin: 0 50%; transform: scaleX(var(--sp, 0)); }
 .cursor { display: none; }

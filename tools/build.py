@@ -371,7 +371,16 @@ CHROME = f"""
   </div>
   <div class="preloader__bar"><span></span></div>
 </div>
-<div class="curtain" aria-hidden="true">{lotus("curtain__lotus")}</div>
+<div class="curtain" aria-hidden="true">
+  <span class="curtain__layer curtain__layer--a"></span>
+  <span class="curtain__layer curtain__layer--b"></span>
+  <div class="curtain__inner">
+    {lotus("curtain__lotus", draw=True)}
+    <p class="curtain__brand"><span>Arielle Innou</span></p>
+    <p class="curtain__to"><span class="curtain__rule"></span><span class="curtain__title" data-curtain-title>Coaching</span><span class="curtain__rule"></span></p>
+  </div>
+</div>
+<script>try{{var t=sessionStorage.getItem("ai-nav-title");if(t)document.querySelector("[data-curtain-title]").textContent=t}}catch(e){{}}</script>
 <div class="scroll-progress" aria-hidden="true"><span></span></div>
 <div class="cursor" aria-hidden="true"><span class="cursor__ring"><span class="cursor__label"></span></span><span class="cursor__dot"></span></div>"""
 
@@ -441,6 +450,16 @@ def page(filename, title, description, body, og="home", jsonld=None, active=None
 """
     out = ROOT / filename
     if out.exists() and EDITED_MARK in out.read_text() and not FORCE:
+        # Keep everything saved from the editor; only refresh the shared intro screen / page curtain
+        # that sits between <body> and the editable header.
+        cur = out.read_text()
+        a, b = cur.find("<body>"), cur.find("<!-- editor:header -->")
+        if a >= 0 and b > a:
+            fresh = cur[:a] + "<body>\n" + CHROME.strip("\n") + "\n" + cur[b:]
+            if fresh != cur:
+                out.write_text(fresh)
+                print(f"  refreshed the page transition in {filename} (editor content kept)")
+                return
         print(f"  skipped {filename} (edited in the visual editor; use --force to overwrite)")
         return
     out.write_text(html)

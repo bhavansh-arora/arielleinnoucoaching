@@ -55,12 +55,25 @@
       setTimeout(function () { html.classList.remove("is-loaded"); }, 1400);
     })(t0);
   } else if (html.classList.contains("is-entering")) {
-    requestAnimationFrame(function () { requestAnimationFrame(function () {
+    // Hold the composed brand for a beat, then lift the curtain.
+    try { sessionStorage.removeItem("ai-nav-title"); } catch (e) {}
+    setTimeout(function () {
       html.classList.add("is-entered");
-      setTimeout(intro, 250);
-      setTimeout(function () { html.classList.remove("is-entering", "is-entered"); }, 1100);
-    }); });
+      setTimeout(intro, 380);
+      setTimeout(function () { html.classList.remove("is-entering", "is-entered"); }, 1500);
+    }, 280);
   } else intro();
+
+  // The name shown on the curtain: the page's name from the menu, else the link's own words.
+  function pageTitle(a, url) {
+    var file = url.pathname.split("/").pop() || "index.html";
+    if (!/\.html$/.test(file)) file += ".html";
+    if (file === "index.html") return "Home";
+    var m = document.querySelector('.mobile-menu__list a[href="' + file + '"] span');
+    if (m && m.textContent.trim()) return m.textContent.trim();
+    var t = (a.querySelector(".btn__text") || a).textContent.replace(/\s+/g, " ").trim();
+    return t && t.length < 40 ? t : "Coaching";
+  }
 
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a[href]");
@@ -70,9 +83,11 @@
     if (url.origin !== location.origin || !/(\.html|\/|\/[^.\/]+)$/.test(url.pathname)) return;
     if (url.pathname === location.pathname) return;
     e.preventDefault();
-    try { sessionStorage.setItem("ai-nav", "1"); } catch (err) {}
+    var title = pageTitle(a, url), slot = $("[data-curtain-title]");
+    if (slot) slot.textContent = title;
+    try { sessionStorage.setItem("ai-nav", "1"); sessionStorage.setItem("ai-nav-title", title); } catch (err) {}
     html.classList.add("is-leaving");
-    setTimeout(function () { location.href = url.href; }, 700);
+    setTimeout(function () { location.href = url.href; }, 900);
   });
   window.addEventListener("pageshow", function (e) { if (e.persisted) html.classList.remove("is-leaving", "is-entering", "is-entered"); });
 
